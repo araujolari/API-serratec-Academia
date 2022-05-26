@@ -5,7 +5,11 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.residencia.Academia.dto.AtividadeDTO;
+import com.residencia.Academia.dto.InstrutorDTO;
 import com.residencia.Academia.dto.TurmaDTO;
+import com.residencia.Academia.entity.Atividade;
+import com.residencia.Academia.entity.Instrutor;
 import com.residencia.Academia.entity.Turma;
 import com.residencia.Academia.repository.TurmaRepository;
 
@@ -13,6 +17,12 @@ import com.residencia.Academia.repository.TurmaRepository;
 public class TurmaService {
 	@Autowired
 	TurmaRepository turmaRepository;
+
+	@Autowired
+	InstrutorService instrutorService;
+
+	@Autowired
+	AtividadeService atividadeService;
 
 	public List<Turma> findAllTurma() {
 		return turmaRepository.findAll();
@@ -38,6 +48,7 @@ public class TurmaService {
 
 	public TurmaDTO saveTurmaDTO(TurmaDTO turmaDTO) {
 		Turma turma = converterDtoParaEntidade(turmaDTO);
+
 		Turma novaTurma = turmaRepository.save(turma);
 
 		return converterEntidadeParaDto(novaTurma);
@@ -67,9 +78,13 @@ public class TurmaService {
 		turma.setDataInicio(turmaDTO.getDataInicio());
 		turma.setDataFim(turmaDTO.getDataFim());
 
-		Turma novaTurma = turmaRepository.save(turma);
+		Instrutor instrutor = instrutorService.findInstrutorById(turmaDTO.getInstrutorDTO().getIdInstrutor());
+		turma.setInstrutor(instrutor);
 
-		return novaTurma;
+		Atividade atividade = atividadeService.findAtividadeById(turmaDTO.getAtividadeDTO().getIdAtividade());
+		turma.setAtividade(atividade);
+
+		return turma;
 	}
 
 	private TurmaDTO converterEntidadeParaDto(Turma turma) {
@@ -80,6 +95,12 @@ public class TurmaService {
 		turmaDTO.setDuracaoTurma(turma.getDuracaoTurma());
 		turmaDTO.setDataInicio(turma.getDataInicio());
 		turmaDTO.setDataFim(turma.getDataFim());
+
+		InstrutorDTO instrutorDTO = instrutorService.findInstrutorDTOById(turma.getInstrutor().getIdInstrutor());
+		turmaDTO.setInstrutorDTO(instrutorDTO);
+
+		AtividadeDTO atividadeDTO = atividadeService.findAtividadeDTOById(turma.getAtividade().getIdAtividade());
+		turmaDTO.setAtividadeDTO(atividadeDTO);
 
 		return turmaDTO;
 	}
